@@ -18,10 +18,10 @@ Standard CLIP was trained on natural images and struggles with the abstract visu
 
 | | Vanilla CLIP | SciCLIP (LoRA r=8) |
 |--|:--:|:--:|
-| R@1 | — | — |
-| R@5 | — | — |
-| R@10 | — | — |
-| MRR | — | — |
+| R@1 | 0.1090 | 0.1655 |
+| R@5 | 0.1935 | 0.2960 |
+| R@10 | 0.2380 | 0.3545 |
+| MRR | 0.1564 | 0.2324 |
 | Trainable params | 100% | **~0.5%** |
 
 ---
@@ -133,6 +133,15 @@ sciclip/
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([notebooks/demo.ipynb](https://drive.google.com/file/d/1rsmRPA37vreScRY4gcr-IQTs9jB4VF7R/view?usp=sharing))
 
 Use Runtime → Change runtime type → **A100 GPU** for best performance.
+
+---
+
+## HuggingFace
+
+Model is available on HF repo!
+[![LoRA4]🥉](https://huggingface.co/jkhyjkhy/sciclip-lora-r4)  
+[![LoRA8]🥇](https://huggingface.co/jkhyjkhy/sciclip-lora-r8)  
+[![LoRA16]🥈](https://huggingface.co/jkhyjkhy/sciclip-lora-r16)  
 
 ---
 
