@@ -138,6 +138,7 @@ def create_demo(lora_retriever, baseline_retriever):
                     columns=5,
                     height="auto",
                     object_fit="contain",
+                    interactive=False,
                 )
                 lora_status = gr.Markdown("")
 
@@ -148,6 +149,7 @@ def create_demo(lora_retriever, baseline_retriever):
                         columns=5,
                         height="auto",
                         object_fit="contain",
+                        interactive=False,
                     )
                     baseline_status = gr.Markdown("")
 
@@ -168,22 +170,42 @@ def create_demo(lora_retriever, baseline_retriever):
         # Event handlers
         def on_search(query, top_k):
             if not query.strip():
+                if baseline_retriever is not None:
+                    return [], "Please enter a search query.", [], "Please enter a search query."
                 return [], "Please enter a search query."
 
             lora_results = search_and_format(lora_retriever, query, top_k)
-            status = f"Found {len(lora_results)} results for: **{query}**"
-            return lora_results, status
+            lora_status = f"Found {len(lora_results)} results for: **{query}**"
+            
+            if baseline_retriever is not None:
+                baseline_results = search_and_format(baseline_retriever, query, top_k)
+                baseline_status = f"Found {len(baseline_results)} results for: **{query}**"
+                return lora_results, lora_status, baseline_results, baseline_status
+                
+            return lora_results, lora_status
 
-        search_btn.click(
-            fn=on_search,
-            inputs=[query_input, top_k_slider],
-            outputs=[lora_gallery, lora_status],
-        )
-        query_input.submit(
-            fn=on_search,
-            inputs=[query_input, top_k_slider],
-            outputs=[lora_gallery, lora_status],
-        )
+        if baseline_retriever is not None:
+            search_btn.click(
+                fn=on_search,
+                inputs=[query_input, top_k_slider],
+                outputs=[lora_gallery, lora_status, baseline_gallery, baseline_status],
+            )
+            query_input.submit(
+                fn=on_search,
+                inputs=[query_input, top_k_slider],
+                outputs=[lora_gallery, lora_status, baseline_gallery, baseline_status],
+            )
+        else:
+            search_btn.click(
+                fn=on_search,
+                inputs=[query_input, top_k_slider],
+                outputs=[lora_gallery, lora_status],
+            )
+            query_input.submit(
+                fn=on_search,
+                inputs=[query_input, top_k_slider],
+                outputs=[lora_gallery, lora_status],
+            )
 
     return demo
 
