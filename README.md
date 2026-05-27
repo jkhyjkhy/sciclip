@@ -140,9 +140,9 @@ Use Runtime → Change runtime type → **A100 GPU** for best performance.
 
 Model is available on HF repo!
 
-[![LoRA4]🥉](https://huggingface.co/jkhyjkhy/sciclip-lora-r4)  
-[![LoRA8]🥇](https://huggingface.co/jkhyjkhy/sciclip-lora-r8)  
-[![LoRA16]🥈](https://huggingface.co/jkhyjkhy/sciclip-lora-r16)  
+[LoRA4🥉](https://huggingface.co/jkhyjkhy/sciclip-lora-r4)  
+[LoRA8🥇](https://huggingface.co/jkhyjkhy/sciclip-lora-r8)  
+[LoRA16🥈](https://huggingface.co/jkhyjkhy/sciclip-lora-r16)  
 
 ---
 
