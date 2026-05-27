@@ -11,3 +11,10 @@ __pycache__/
 *.pyc
 *.pyo
 .env
+
+# Data & checkpoints
+data/images/
+data/*.jsonl
+checkpoints/
+*.index
+*.faiss
