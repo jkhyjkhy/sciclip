@@ -176,6 +176,7 @@ def prepare_scicap(
     print(f"\n[3/3] Extracting {len(needed_filenames):,} images from zip…")
 
     extracted_map: dict[str, Path] = {}
+    import shutil
 
     with zipfile.ZipFile(merged_zip_path, "r") as zf:
         # Build basename → full zip entry mapping (entries may have subdir prefix)
@@ -185,19 +186,26 @@ def prepare_scicap(
             if base:
                 basename_to_entry[base] = entry
 
-        for fname in tqdm(needed_filenames, desc="Extracting"):
+        # Collect ZipInfo objects for the files we need to extract
+        needed_zinfos = []
+        for fname in needed_filenames:
+            entry = basename_to_entry.get(fname)
+            if entry:
+                needed_zinfos.append(zf.getinfo(entry))
+
+        # Sort entries by physical file offset to ensure sequential reading!
+        # This bypasses severe random-seek penalties on cloud storage filesystems.
+        needed_zinfos.sort(key=lambda x: x.header_offset)
+
+        for zinfo in tqdm(needed_zinfos, desc="Extracting"):
+            fname = os.path.basename(zinfo.filename)
             out_path = image_dir / fname
             if out_path.exists():
                 extracted_map[fname] = out_path
                 continue
 
-            entry = basename_to_entry.get(fname)
-            if entry is None:
-                continue  # image not found in zip
-
-            data = zf.read(entry)
-            with open(out_path, "wb") as f:
-                f.write(data)
+            with zf.open(zinfo) as source, open(out_path, "wb") as target:
+                shutil.copyfileobj(source, target)
             extracted_map[fname] = out_path
 
     print(f"      Extracted {len(extracted_map):,} images")
