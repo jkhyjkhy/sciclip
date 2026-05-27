@@ -122,19 +122,53 @@ def prepare_scicap(
     print(f"      Selecting {len(needed_filenames):,} images to extract")
 
     # ------------------------------------------------------------------ #
-    # Step 2 — Download img-split.zip (training images)                  #
+    # Step 2 — Download all split zip parts (training images, ~20 GB)     #
     # ------------------------------------------------------------------ #
-    print("\n[2/3] Downloading img-split.zip…")
-    print("      ⚠️  This file can be 10–20 GB. Download may take 15–30 min.")
-    print("      It is cached in ~/.cache/huggingface/ — only downloaded once.")
+    print("\n[2/3] Downloading split zip files (~20 GB total)…")
+    print("      ⚠️  This is a multi-disk zip archive. We must download all 11 parts.")
+    print("      They are cached in ~/.cache/huggingface/ — only downloaded once.")
 
-    zip_path = hf_hub_download(
-        repo_id="CrowdAILab/scicap",
-        filename="img-split.zip",
-        repo_type="dataset",
-        token=token,
-    )
-    print(f"      Cached at: {zip_path}")
+    split_parts = [f"img-split.z{i:02d}" for i in range(1, 11)] + ["img-split.zip"]
+    
+    cache_dir = None
+    for part in split_parts:
+        print(f"      Downloading {part}…")
+        part_path = hf_hub_download(
+            repo_id="CrowdAILab/scicap",
+            filename=part,
+            repo_type="dataset",
+            token=token,
+        )
+        if part == "img-split.zip":
+            cache_dir = Path(part_path).parent
+
+    print(f"      All parts downloaded in: {cache_dir}")
+
+    # Merge split zip files into a single, standard ZIP archive
+    merged_zip_path = output_dir / "merged_img_split.zip"
+    if not merged_zip_path.exists():
+        print("      Merging split zip files into a single ZIP archive…")
+        import subprocess
+        try:
+            cmd = ["zip", "-F", "img-split.zip", "--out", str(merged_zip_path.resolve())]
+            print(f"      Running command: {' '.join(cmd)}")
+            result = subprocess.run(
+                cmd,
+                cwd=str(cache_dir),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if not merged_zip_path.exists():
+                raise RuntimeError(f"Failed to merge zip files: {result.stderr}")
+            print(f"      ✓ Successfully merged split files → {merged_zip_path}")
+        except FileNotFoundError:
+            raise RuntimeError(
+                "The 'zip' command-line utility was not found. "
+                "Please install it (e.g., 'apt install zip' or 'brew install zip') and try again."
+            )
+    else:
+        print(f"      ✓ Merged ZIP archive already exists: {merged_zip_path}")
 
     # ------------------------------------------------------------------ #
     # Step 3 — Selectively extract only the images we need               #
@@ -143,7 +177,7 @@ def prepare_scicap(
 
     extracted_map: dict[str, Path] = {}
 
-    with zipfile.ZipFile(zip_path, "r") as zf:
+    with zipfile.ZipFile(merged_zip_path, "r") as zf:
         # Build basename → full zip entry mapping (entries may have subdir prefix)
         basename_to_entry = {}
         for entry in zf.namelist():

@@ -15,6 +15,7 @@ __pycache__/
 # Data & checkpoints
 data/images/
 data/*.jsonl
+data/*.zip
 checkpoints/
 *.index
 *.faiss
