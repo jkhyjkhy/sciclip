@@ -30,7 +30,7 @@ Standard CLIP was trained on natural images and struggles with the abstract visu
 
 ```bash
 # 1. Clone & install
-git clone https://github.com/YOUR_USERNAME/sciclip.git
+git clone https://github.com/jkhyjkhy/sciclip.git
 cd sciclip
 pip install -r requirements.txt
 
